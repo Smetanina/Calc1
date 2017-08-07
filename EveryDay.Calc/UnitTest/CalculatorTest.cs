@@ -12,7 +12,7 @@ namespace UnitTest
         {
             // Arrange
             var calc = new Calculator();
-            
+
             // Act
             var sum = calc.Sum(1, 2);
             var sum1 = calc.Sum(0, 0);
@@ -31,7 +31,7 @@ namespace UnitTest
             var calc = new Calculator();
 
             // Act
-            var div  = calc.Div(2, 1);
+            var div = calc.Div(2, 1);
             var div1 = calc.Div(0, 0);
             var div2 = calc.Div(1, -1);
 
@@ -55,6 +55,23 @@ namespace UnitTest
             Assert.AreEqual(4, squa);
             Assert.AreEqual(0, squa1);
             Assert.AreEqual(1, squa2);
+        }
+
+        [TestMethod]
+        public void TestMySqrt()
+        {
+            // Arrange
+            var calc = new Calculator();
+
+            // Act
+            var sqrt = calc.MySqrt(2);
+            var sqrt1 = calc.MySqrt(0);
+            var sqrt2 = calc.MySqrt(1);
+
+            // Assert
+            Assert.AreEqual(4, sqrt);
+            Assert.AreEqual(0, sqrt1);
+            Assert.AreEqual(1, sqrt2);
         }
     }
 }
