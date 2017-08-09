@@ -15,6 +15,7 @@ namespace EveryDay.Calc.Console
 
             var calc = new Calculator();
 
+
             double result = 0.0;
 
             if (oper.ToLower() == "sum")
