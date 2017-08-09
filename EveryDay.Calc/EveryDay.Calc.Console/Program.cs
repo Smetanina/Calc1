@@ -1,5 +1,12 @@
 ﻿using EveryDay.Calc.Calculation;
+using EveryDay.Calc.Calculation.Interfaces;
+using EveryDay.Calc.Calculation.Models;
+using System;
+using System.Linq;
+using System.Collections.Generic;
+using System.Reflection;
 using SConsole = System.Console;
+using System.IO;
 
 namespace EveryDay.Calc.Console
 {
@@ -7,57 +14,65 @@ namespace EveryDay.Calc.Console
     {
         static void Main(string[] args)
         {
-            var oper = args[0];
-            
+            var oper = args[0].ToLower();
+
             var x = Str2Int(args[1]);
 
             var y = Str2Int(args[2]);
 
-            var calc = new Calculator();
+            var calc = new Calculator(LoadOperations());
 
-            double result = 0.0;
+            var result = calc.Calc(oper, new[] { x, y });
 
-            if (oper.ToLower() == "sum")
-            {
-                result = calc.Sum(x, y);
-            }
-            else if (oper.ToLower()  == "div")
-                {
-                    result = calc.Div(x, y);
-                }
-            else if (oper.ToLower() == "squa")
-                {
-                    result = calc.Squa(x);
-                
-                }
-            else if (oper.ToUpper() == "MYSQRT")
-            {
-                result = calc.MySqrt(x);
-            }
-            else if (oper.ToLower() == "mult")
-            {
-                result = calc.Mult(x, y);
-            }
-            else if (oper.ToLower() == "subt")
-            {
-                result = calc.Subt(x, y);
-            }
-            else
-            {
-                SConsole.WriteLine("Нет такой операции");
-            }
-            
             SConsole.WriteLine(result.ToString());
 
             SConsole.ReadKey();
         }
 
-
-        private static int Str2Int(string str)
+        private static IEnumerable<IOperation> LoadOperations()
         {
-            int result;
+            var opers = new List<IOperation>();
 
-            if(!int.TryParse(str, out result)){
+            var typeOperation = typeof(IOperation);
+
+            // найти все dll, которые находятся рядом с нашим exe
+            var dlls = Directory.GetFiles(Environment.CurrentDirectory, "*.dll");
+
+            // перебираем
+            foreach (var dll in dlls)
+            {
+                // загружаем сборку из файла
+                var assembly = Assembly.LoadFrom(dll);
+                // получаем типы/классы/интерфейсы из сброрки
+                var types = assembly.GetTypes();
+
+                // перебираем типы
+                foreach (var type in types)
+                {
+                    var interfaces = type.GetInterfaces();
+                    // если тип реализует наш интерфейс 
+                    if (interfaces.Contains(typeOperation))
+                    {
+                        // пытаемся создать экземпляр
+                        var instance = Activator.CreateInstance(type) as IOperation;
+                        if (instance != null)
+                        {
+                            // добавляем в список операций
+                            opers.Add(instance);
+                        }
+                    }
+                }
+            }
+
+            return opers;
+        }
+
+        private static double Str2Int(string str)
+        {
+            double result;
+
+            if (!double.TryParse(str, out result))
+            {
                 SConsole.WriteLine("Не удалось преобразовать \"{0}\" в число", str);
             }
             return result;
